@@ -1,6 +1,8 @@
 from rest_framework import generics,mixins,permissions
 from rest_framework.authentication import SessionAuthentication
 
+from accounts.permissions import IsOwnerOrReadOnly
+
 from .models import Status
 from .serializers import StatusSerializer
 
@@ -10,14 +12,17 @@ class StatusAPIView(mixins.CreateModelMixin,
     permission_classes = [permissions.IsAuthenticatedOrReadOnly]
     #authentication_classes = [SessionAuthentication]
     serializer_class = StatusSerializer
+    search_fields = ('user__username','content')
+    queryset = Status.objects.all()
 
-    def get_queryset(self):
-        print(self.request.user)
-        qs = Status.objects.all()
-        query = self.request.GET.get('q')
-        if query is not None:
-            qs = qs.filter(content__icontains=query)
-        return qs
+
+    # def get_queryset(self):
+    #     print(self.request.user)
+    #     qs = Status.objects.all()
+    #     query = self.request.GET.get('q')
+    #     if query is not None:
+    #         qs = qs.filter(content__icontains=query)
+    #     return qs
 
     def post(self,request,*args,**kwargs):
         return self.create(request,*args,**kwargs)
@@ -33,7 +38,7 @@ class StatusCreateAPIView(generics.CreateAPIView):
 
 
 class StatusDetailAPIView(generics.RetrieveUpdateDestroyAPIView):
-    #permission_classes = []
-    #authentication_classes = []
+    permission_classes = [permissions.IsAuthenticatedOrReadOnly,IsOwnerOrReadOnly]
+    authentication_classes = []
     queryset = Status.objects.all()
     serializer_class = StatusSerializer

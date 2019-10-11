@@ -8,10 +8,10 @@ from rest_framework_jwt.settings import api_settings
 
 from .serializers import UserRegisterSerializer
 
-from .utils import jwt_response_payload_handler
+from .permissions import AnonPermissionOnly
 
 jwt_payload_handler = api_settings.JWT_PAYLOAD_HANDLER
-jwt_enclode_handler = api_settings.JWT_ENCODE_HANDLER
+jwt_encode_handler = api_settings.JWT_ENCODE_HANDLER
 jwt_response_payload_handler = api_settings.JWT_RESPONSE_PAYLOAD_HANDLER
 
 User = get_user_model()
@@ -19,7 +19,7 @@ User = get_user_model()
 
 # Create your views here.
 class AuthAPIView(APIView):
-    permission_classes = [permissions.AllowAny]
+    permission_classes = [AnonPermissionOnly]
     def post(self,request,*args,**kwargs):
         if request.user.is_authenticated:
             return Response({'detail':'You are already authenticated.'},status=400)
@@ -44,7 +44,7 @@ class AuthAPIView(APIView):
 class RegisterAPIView(generics.CreateAPIView):
     queryset = User.objects.all()
     serializer_class = UserRegisterSerializer
-    permission_classes = [permissions.AllowAny]
+    permission_classes = [AnonPermissionOnly]
 
 
 '''
@@ -80,6 +80,3 @@ class RegisterAPIView(APIView):
             return Response({"detail":"Thank you for registering. Please verify your email."},status=200)
         return Response({"detail":"Invalid request."},status=400)
 '''
-
-
-
